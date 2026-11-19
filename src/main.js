@@ -1,13 +1,15 @@
 import Lenis from 'lenis';
-import { PRODUCTS } from './products.js';
+import { PRODUCTS, PROCESS, TESTIMONIALS, unsplash, srcset } from './products.js';
 import { hasWebGL, prefersReducedMotion, CM_PER_UNIT, TINTS } from './glass.js';
 import { createCart, money } from './cart.js';
 
 const $ = (s) => document.querySelector(s);
+const reduce = prefersReducedMotion();
+const finePointer = window.matchMedia('(pointer: fine)').matches;
 
 /* ---------- smooth scroll ---------- */
 let lenis = null;
-if (!prefersReducedMotion()) {
+if (!reduce) {
   lenis = new Lenis({ lerp: 0.1 });
   const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
   requestAnimationFrame(raf);
@@ -23,10 +25,9 @@ if (!prefersReducedMotion()) {
 
 /* ---------- nav colour over hero ---------- */
 const nav = $('#nav');
-const hero = document.querySelector('.hero');
 new IntersectionObserver(([e]) => nav.classList.toggle('nav-solid', !e.isIntersecting), {
   rootMargin: '-64px 0px 0px 0px',
-}).observe(hero);
+}).observe($('.hero'));
 
 /* ---------- toast ---------- */
 let toastTimer;
@@ -89,16 +90,18 @@ function bumpCart() {
 }
 
 /* ---------- product grid ---------- */
-const images = {};
 const grid = $('#grid');
 for (const p of PRODUCTS) {
   const li = document.createElement('li');
   li.className = `card card-${p.span}`;
-  li.style.setProperty('--bg', p.bg);
   const low = p.stock <= 3;
   li.innerHTML = `
     <div class="card-media">
-      <img alt="${p.name}, hand-blown ${TINTS[p.tint].name.toLowerCase()} glass" data-id="${p.id}" width="720" height="900" decoding="async">
+      <img alt="${p.name}, hand-blown ${TINTS[p.tint].name.toLowerCase()} glass"
+        src="${unsplash(p.photo, 900, 1125)}" srcset="${srcset(p.photo)}"
+        sizes="(max-width: 600px) 100vw, (max-width: 960px) 50vw, 45vw"
+        width="900" height="1125" loading="lazy" decoding="async">
+      <div class="loupe" aria-hidden="true" style="background-image:url('${unsplash(p.photo, 1800, 2250)}')"></div>
       ${low ? `<span class="stock">Only ${p.stock} left</span>` : ''}
     </div>
     <div class="card-body">
@@ -110,16 +113,85 @@ for (const p of PRODUCTS) {
       <p class="card-meta">${p.size}. ${p.maker}.</p>
       <button type="button" class="btn btn-ink" data-add="${p.id}">Add to cart</button>
     </div>`;
+  const img = li.querySelector('img');
+  const show = () => img.classList.add('in');
+  if (img.complete) show(); else img.addEventListener('load', show, { once: true });
   grid.appendChild(li);
 }
+
+// the loupe: a round lens that magnifies the photo under the cursor
+if (finePointer && !reduce) {
+  grid.querySelectorAll('.card-media').forEach((m) => {
+    const lens = m.querySelector('.loupe');
+    m.addEventListener('pointerenter', () => m.classList.add('looking'));
+    m.addEventListener('pointerleave', () => m.classList.remove('looking'));
+    m.addEventListener('pointermove', (e) => {
+      const r = m.getBoundingClientRect();
+      const x = e.clientX - r.left, y = e.clientY - r.top;
+      lens.style.transform = `translate(${x}px, ${y}px)`;
+      lens.style.backgroundPosition = `${(x / r.width) * 100}% ${(y / r.height) * 100}%`;
+    });
+  });
+}
+
 grid.addEventListener('click', (e) => {
   const id = e.target.closest('[data-add]')?.dataset.add;
   if (!id) return;
   const p = PRODUCTS.find((x) => x.id === id);
-  cart.add({ id: p.id, name: p.name, price: p.price, meta: `${TINTS[p.tint].name}, ${p.size.split(',')[0]}`, img: images[p.id], bg: p.bg });
+  cart.add({
+    id: p.id, name: p.name, price: p.price,
+    meta: `${TINTS[p.tint].name}, ${p.size.split(',')[0]}`,
+    img: unsplash(p.photo, 160, 200), bg: '#e3e8ec',
+  });
   bumpCart();
   toast(`Added ${p.name} to your cart`);
 });
+
+/* ---------- furnace + studio photos ---------- */
+const furnace = $('#furnaceImg');
+furnace.src = unsplash('1625765361596-d425d3c3eb96', 2000, 1100);
+furnace.srcset = [900, 1400, 2000].map((w) => `${unsplash('1625765361596-d425d3c3eb96', w, Math.round(w * 0.55))} ${w}w`).join(', ');
+furnace.sizes = '100vw';
+const studio = $('#studioImg');
+studio.src = unsplash('1773125465958-4b83adc60498', 1100, 1375);
+
+// heat haze: the turbulence drifts only while the furnace is on screen
+if (!reduce) {
+  const noise = $('#heatNoise');
+  let on = false, t = 0;
+  new IntersectionObserver(([e]) => { on = e.isIntersecting; if (on) loop(); }).observe($('.furnace'));
+  function loop() {
+    if (!on) return;
+    t += 0.012;
+    noise.setAttribute('baseFrequency', `${0.008 + Math.sin(t) * 0.002} ${0.03 + Math.cos(t * 0.7) * 0.008}`);
+    noise.setAttribute('seed', String(Math.floor(t * 6) % 40));
+    requestAnimationFrame(loop);
+  }
+}
+
+/* ---------- process ---------- */
+$('#steps').innerHTML = PROCESS.map((s, i) => `
+  <li style="--heat:${i}">
+    <figure><img src="${unsplash(s.photo, 600, 800)}" alt="${s.name}: ${s.text.split('.')[0].toLowerCase()}" loading="lazy" decoding="async" width="600" height="800"></figure>
+    <span class="temp">${s.temp.replace(' °C', '&nbsp;°C')}</span>
+    <h3>${s.name}</h3>
+    <p>${s.text}</p>
+  </li>`).join('');
+
+/* ---------- testimonials ---------- */
+const track = $('#lettersTrack');
+track.innerHTML = TESTIMONIALS.map((t) => `
+  <li class="letter">
+    <figure><img src="${unsplash(t.photo, 700, 875)}" alt="${t.bought} in ${t.name.split(' ')[0]}'s home" loading="lazy" decoding="async" width="700" height="875"></figure>
+    <blockquote><p>${t.quote}</p></blockquote>
+    <p class="letter-who"><strong>${t.name}</strong>, ${t.place}</p>
+    <p class="letter-bought">Owns the ${t.bought.replace(/^A /, '')}</p>
+  </li>`).join('');
+const step = () => track.querySelector('.letter').getBoundingClientRect().width + 24;
+$('#lettersPrev').onclick = () => track.scrollBy({ left: -step(), behavior: reduce ? 'auto' : 'smooth' });
+$('#lettersNext').onclick = () => track.scrollBy({ left: step(), behavior: reduce ? 'auto' : 'smooth' });
+// let the page's smooth scroll ignore horizontal wheel on the track
+track.setAttribute('data-lenis-prevent-horizontal', '');
 
 /* ---------- newsletter ---------- */
 $('#newsletter').addEventListener('submit', (e) => {
@@ -137,21 +209,7 @@ if (!hasWebGL()) {
   const heroApi = initHero($('#heroCanvas'));
   heroApi.onShapeChange((p) => { $('#heroPiece').textContent = p.name; });
 
-  // product renders: after the hero has drawn its first frames
-  const { renderThumbs, renderSingle } = await import('./thumbs.js');
-  const idle = window.requestIdleCallback || ((fn) => setTimeout(fn, 300));
-  idle(async () => {
-    await document.fonts?.ready;
-    const urls = await renderThumbs(PRODUCTS);
-    Object.assign(images, urls);
-    cart.fillImages(urls);
-    document.querySelectorAll('.card-media img').forEach((img) => {
-      img.src = urls[img.dataset.id];
-      img.addEventListener('load', () => img.classList.add('in'), { once: true });
-    });
-  });
-
-  // configurator
+  const { renderSingle } = await import('./thumbs.js');
   const { initConfigurator } = await import('./configurator.js');
   let latest = null;
   const fmt = {
@@ -161,19 +219,17 @@ if (!hasWebGL()) {
     lip: (v) => `${Math.round(v * 2 * CM_PER_UNIT)} cm`,
     bellyPos: (v) => (v < 0.3 ? 'Low' : v < 0.46 ? 'Middle' : 'High'),
   };
-  let makeReady = false;
   const cfg = initConfigurator($('#makeCanvas'), {
     onChange(s) {
       latest = s;
-      if (!makeReady) return;
-      $('#specH').textContent = `${Math.round(s.heightCm)} cm`;
+      const h = $('#specH');
+      if (!h) return;
+      h.textContent = `${Math.round(s.heightCm)} cm`;
       $('#specMl').textContent = s.ml >= 1000 ? `${(s.ml / 1000).toFixed(1)} L` : `${Math.round(s.ml / 10) * 10} ml`;
       $('#specPrice').textContent = money(s.price);
     },
   });
-  makeReady = true;
-  const form = $('#makeForm');
-  form.querySelectorAll('input[type=range]').forEach((input) => {
+  $('#makeForm').querySelectorAll('input[type=range]').forEach((input) => {
     const out = $(`#o-${input.name}`);
     const sync = () => {
       cfg.set(input.name, parseFloat(input.value));

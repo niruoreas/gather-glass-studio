@@ -9,11 +9,19 @@
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,300..900&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://images.unsplash.com">
+  <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..800;1,6..96,400..800&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/src/style.css">
 </head>
 <body>
   <a class="skip" href="#shop">Skip to the shop</a>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <filter id="heat" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence id="heatNoise" type="fractalNoise" baseFrequency="0.008 0.03" numOctaves="2" seed="4" result="noise" />
+      <feDisplacementMap in="SourceGraphic" in2="noise" scale="22" xChannelSelector="R" yChannelSelector="G" />
+    </filter>
+  </svg>
 
   <header class="nav" id="nav">
     <a class="wordmark" href="#top" aria-label="Gather Glass Studio, home">gather</a>
@@ -21,6 +29,7 @@
       <a href="#shop">Shop</a>
       <a href="#process">How it's made</a>
       <a href="#make">Shape your own</a>
+      <a href="#letters">Reviews</a>
     </nav>
     <button class="cart-btn" type="button" id="cartOpen" aria-haspopup="dialog" aria-controls="cart">
       Cart <span class="cart-count" id="cartCount" hidden>0</span>
@@ -41,44 +50,28 @@
     <section class="shop" id="shop" aria-labelledby="shopTitle">
       <div class="section-head">
         <h2 id="shopTitle">This month's kiln</h2>
-        <p>Six forms, blown in small runs. When a run sells out, the next one comes out a little different.</p>
+        <p>Six forms, blown in small runs. When a run sells out, the next one comes out a little different. Hover a photo to look closer at the glass.</p>
       </div>
       <ul class="grid" id="grid"></ul>
     </section>
 
+    <section class="furnace" aria-labelledby="furnaceTitle">
+      <div class="furnace-img" aria-hidden="true">
+        <img id="furnaceImg" alt="" loading="lazy" decoding="async">
+      </div>
+      <div class="furnace-copy">
+        <h2 id="furnaceTitle">Our furnace hasn't gone out since 2014.</h2>
+        <p>It holds 200 kg of clear glass at 1,150&nbsp;°C, day and night. Turning it off would crack the crucible, so we keep it fed and keep working.</p>
+      </div>
+    </section>
+
     <section class="process" id="process" aria-labelledby="processTitle">
       <div class="section-head">
-        <h2 id="processTitle">From 1,150&nbsp;°C to your table</h2>
-        <p>Every vessel goes through the same five stages. The whole thing takes about twenty minutes of work and fourteen hours of cooling.</p>
+        <h2 id="processTitle">From 1,150&nbsp;°C to&nbsp;your&nbsp;table</h2>
+        <p>Every vessel goes through the same five stages: about twenty minutes of work, then fourteen hours of cooling.</p>
       </div>
-      <ol class="steps">
-        <li style="--heat:0">
-          <span class="temp">1,150&nbsp;°C</span>
-          <h3>Gather</h3>
-          <p>We dip the blowpipe into the furnace and turn it to collect a honey-thick glob of molten glass.</p>
-        </li>
-        <li style="--heat:1">
-          <span class="temp">1,000&nbsp;°C</span>
-          <h3>Marver</h3>
-          <p>The gather is rolled on a steel table to centre it and cool its skin, so it holds a bubble.</p>
-        </li>
-        <li style="--heat:2">
-          <span class="temp">900&nbsp;°C</span>
-          <h3>Blow</h3>
-          <p>One long breath opens the bubble. Colour is added here, rolled in as powdered glass.</p>
-        </li>
-        <li style="--heat:3">
-          <span class="temp">750&nbsp;°C</span>
-          <h3>Shape</h3>
-          <p>Jacks, wooden paddles and wet newspaper pull out the neck and open the lip.</p>
-        </li>
-        <li style="--heat:4">
-          <span class="temp">480&nbsp;°C to room</span>
-          <h3>Anneal</h3>
-          <p>The piece cools slowly in a kiln overnight so it never cracks from stress. Then we sign it.</p>
-        </li>
-      </ol>
-      <div class="heat-scale" aria-hidden="true"></div>
+      <ol class="steps" id="steps"></ol>
+      <div class="heat-scale" aria-hidden="true"><span>Hottest</span><span>Room temperature</span></div>
     </section>
 
     <section class="make" id="make" aria-labelledby="makeTitle">
@@ -122,9 +115,27 @@
       </div>
     </section>
 
+    <section class="letters" id="letters" aria-labelledby="lettersTitle">
+      <div class="letters-head">
+        <h2 id="lettersTitle">Where our glass ended up</h2>
+        <div class="letters-nav">
+          <p><strong>4.9</strong> average from 1,240 reviews</p>
+          <button type="button" class="round-btn" id="lettersPrev" aria-label="Previous reviews">‹</button>
+          <button type="button" class="round-btn" id="lettersNext" aria-label="Next reviews">›</button>
+        </div>
+      </div>
+      <ul class="letters-track" id="lettersTrack" tabindex="0" aria-label="Customer reviews, scroll sideways"></ul>
+    </section>
+
     <section class="studio" aria-labelledby="studioTitle">
-      <h2 id="studioTitle">Three people, two furnaces, one rule</h2>
-      <p>Ines, Tomás and Mira run the furnaces five days a week. The rule: nothing leaves the studio unless the person who blew it would put it on their own table. Seconds are recycled into the next gather.</p>
+      <figure class="studio-img">
+        <img id="studioImg" alt="A glassblower holding a glowing gather of molten glass at the end of a pipe" loading="lazy" decoding="async">
+      </figure>
+      <div class="studio-copy">
+        <h2 id="studioTitle">Three people, two furnaces, one rule</h2>
+        <p>Ines, Tomás and Mira run the furnaces five days a week. The rule: nothing leaves the studio unless the person who blew it would put it on their own table.</p>
+        <p>Seconds aren't sold at a discount. They're broken up and melted into the next gather.</p>
+      </div>
     </section>
   </main>
 
@@ -139,7 +150,7 @@
     </form>
     <div class="footer-meta">
       <p class="wordmark wordmark-big" aria-hidden="true">gather</p>
-      <p>A portfolio concept. Gather is a fictional studio; no orders are placed.</p>
+      <p>A portfolio concept. Gather is a fictional studio and no orders are placed. Photography from <a href="https://unsplash.com" rel="noopener">Unsplash</a>.</p>
     </div>
   </footer>
 

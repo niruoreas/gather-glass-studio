@@ -47,12 +47,12 @@ export async function renderThumbs(products, { width = 720, height = 900 } = {})
     ctx.fillRect(0, 0, 1024, 1280);
     ctx.fillStyle = 'rgba(14,26,74,0.14)';
     ctx.textAlign = 'center';
-    if ('fontStretch' in ctx) ctx.fontStretch = 'condensed';
+
     const word = p.name.split(' ')[0];
     let size = 600;
-    ctx.font = `800 ${size}px Anybody, sans-serif`;
+    ctx.font = `italic 500 ${size}px "Bodoni Moda", serif`;
     size = Math.floor(size * Math.min(1, 980 / ctx.measureText(word).width));
-    ctx.font = `800 ${size}px Anybody, sans-serif`;
+    ctx.font = `italic 500 ${size}px "Bodoni Moda", serif`;
     ctx.fillText(word, 512, 640 + size * 0.34);
     backTex.needsUpdate = true;
 

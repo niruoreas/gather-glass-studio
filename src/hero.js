@@ -20,16 +20,16 @@ function drawHeadline(canvas, aspect) {
   ctx.fillStyle = ICE;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'alphabetic';
-  if ('fontStretch' in ctx) ctx.fontStretch = 'expanded';
+
 
   // fit the longest line to ~94% of the width
   let size = 400;
-  const font = (s) => `800 ${s}px Anybody, "Arial Black", sans-serif`;
+  const font = (s) => `500 ${s}px "Bodoni Moda", Didot, serif`;
   ctx.font = font(size);
   const widest = Math.max(...lines.map((l) => ctx.measureText(l).width));
-  size = Math.floor(size * Math.min((W * 0.94) / widest, (H * 0.86) / (lines.length * 400 * 0.92)));
+  size = Math.floor(size * Math.min((W * 0.84) / widest, (H * 0.86) / (lines.length * 400 * 0.92)));
   ctx.font = font(size);
-  const lh = size * 0.92;
+  const lh = size * 1.0;
   const total = lh * lines.length;
   let y = (H - total) / 2 + size * 0.8;
   for (const l of lines) {
@@ -170,7 +170,7 @@ export function initHero(canvas) {
   new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(canvas);
   new ResizeObserver(resize).observe(canvas);
 
-  const ready = document.fonts ? document.fonts.load('800 100px Anybody') : Promise.resolve();
+  const ready = document.fonts ? document.fonts.load('500 100px "Bodoni Moda"') : Promise.resolve();
   ready.finally(() => {
     resize();
     requestAnimationFrame(tick);
