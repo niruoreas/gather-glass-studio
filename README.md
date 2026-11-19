@@ -2,6 +2,8 @@
 
 A concept e-commerce site for a fictional glassblowing studio. Built as a portfolio piece.
 
+**Live:** https://gather-glass-studio.vercel.app
+
 ## What makes it different
 
 - **The headline refracts through real glass.** The hero is a live WebGL scene. The headline is set on a plane behind a glass vessel rendered with physically based transmission (IOR 1.52, attenuation tint). As the vessel turns and follows your cursor, the type bends through it. The vessel also morphs between the shapes in the shop.
