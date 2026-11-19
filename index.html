@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gather Glass Studio</title>
+  <meta name="description" content="Hand-blown glass vessels from a two-furnace studio. Shop the collection or shape your own vase in real time.">
+  <meta name="theme-color" content="#1F35C4">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anybody:wdth,wght@50..150,300..900&family=Figtree:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+  <a class="skip" href="#shop">Skip to the shop</a>
+
+  <header class="nav" id="nav">
+    <a class="wordmark" href="#top" aria-label="Gather Glass Studio, home">gather</a>
+    <nav aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#process">How it's made</a>
+      <a href="#make">Shape your own</a>
+    </nav>
+    <button class="cart-btn" type="button" id="cartOpen" aria-haspopup="dialog" aria-controls="cart">
+      Cart <span class="cart-count" id="cartCount" hidden>0</span>
+    </button>
+  </header>
+
+  <main id="top">
+    <section class="hero" aria-labelledby="heroTitle">
+      <canvas class="hero-canvas" id="heroCanvas" aria-hidden="true"></canvas>
+      <h1 id="heroTitle" class="hero-fallback">Shaped by breath, finished by hand.</h1>
+      <div class="hero-foot">
+        <p>Hand-blown vessels from a two-furnace studio. Each piece is made once, signed on the base, and shipped packed in wool.</p>
+        <p class="hero-now" aria-live="polite">On the pipe now: <strong id="heroPiece">Tidepool carafe</strong></p>
+        <a class="btn btn-molten" href="#shop">Shop the collection</a>
+      </div>
+    </section>
+
+    <section class="shop" id="shop" aria-labelledby="shopTitle">
+      <div class="section-head">
+        <h2 id="shopTitle">This month's kiln</h2>
+        <p>Six forms, blown in small runs. When a run sells out, the next one comes out a little different.</p>
+      </div>
+      <ul class="grid" id="grid"></ul>
+    </section>
+
+    <section class="process" id="process" aria-labelledby="processTitle">
+      <div class="section-head">
+        <h2 id="processTitle">From 1,150&nbsp;°C to your table</h2>
+        <p>Every vessel goes through the same five stages. The whole thing takes about twenty minutes of work and fourteen hours of cooling.</p>
+      </div>
+      <ol class="steps">
+        <li style="--heat:0">
+          <span class="temp">1,150&nbsp;°C</span>
+          <h3>Gather</h3>
+          <p>We dip the blowpipe into the furnace and turn it to collect a honey-thick glob of molten glass.</p>
+        </li>
+        <li style="--heat:1">
+          <span class="temp">1,000&nbsp;°C</span>
+          <h3>Marver</h3>
+          <p>The gather is rolled on a steel table to centre it and cool its skin, so it holds a bubble.</p>
+        </li>
+        <li style="--heat:2">
+          <span class="temp">900&nbsp;°C</span>
+          <h3>Blow</h3>
+          <p>One long breath opens the bubble. Colour is added here, rolled in as powdered glass.</p>
+        </li>
+        <li style="--heat:3">
+          <span class="temp">750&nbsp;°C</span>
+          <h3>Shape</h3>
+          <p>Jacks, wooden paddles and wet newspaper pull out the neck and open the lip.</p>
+        </li>
+        <li style="--heat:4">
+          <span class="temp">480&nbsp;°C to room</span>
+          <h3>Anneal</h3>
+          <p>The piece cools slowly in a kiln overnight so it never cracks from stress. Then we sign it.</p>
+        </li>
+      </ol>
+      <div class="heat-scale" aria-hidden="true"></div>
+    </section>
+
+    <section class="make" id="make" aria-labelledby="makeTitle">
+      <div class="make-stage">
+        <canvas id="makeCanvas" tabindex="0" aria-label="Your vessel preview. Drag or use arrow keys to turn it."></canvas>
+        <p class="make-hint">Drag to turn. Grid squares are 5 cm.</p>
+      </div>
+      <div class="make-panel">
+        <h2 id="makeTitle">Shape your own</h2>
+        <p class="make-lede">Set the form and colour, and we'll blow it for you within three weeks. What you see is what goes on the pipe.</p>
+
+        <form id="makeForm" class="controls">
+          <label>Height <output id="o-h"></output>
+            <input type="range" name="h" min="1.3" max="3.2" step="0.01" value="2.2">
+          </label>
+          <label>Belly width <output id="o-belly"></output>
+            <input type="range" name="belly" min="0.42" max="1.0" step="0.01" value="0.7">
+          </label>
+          <label>Where the belly sits <output id="o-bellyPos"></output>
+            <input type="range" name="bellyPos" min="0.18" max="0.62" step="0.01" value="0.34">
+          </label>
+          <label>Neck width <output id="o-neck"></output>
+            <input type="range" name="neck" min="0.1" max="0.55" step="0.01" value="0.22">
+          </label>
+          <label>Lip opening <output id="o-lip"></output>
+            <input type="range" name="lip" min="0.12" max="0.75" step="0.01" value="0.34">
+          </label>
+
+          <fieldset class="swatches">
+            <legend>Colour</legend>
+            <div id="swatches"></div>
+          </fieldset>
+        </form>
+
+        <dl class="spec">
+          <div><dt>Height</dt><dd id="specH">–</dd></div>
+          <div><dt>Holds</dt><dd id="specMl">–</dd></div>
+          <div><dt>Price</dt><dd id="specPrice">–</dd></div>
+        </dl>
+        <button class="btn btn-molten btn-block" type="button" id="makeAdd">Add your vessel to cart</button>
+      </div>
+    </section>
+
+    <section class="studio" aria-labelledby="studioTitle">
+      <h2 id="studioTitle">Three people, two furnaces, one rule</h2>
+      <p>Ines, Tomás and Mira run the furnaces five days a week. The rule: nothing leaves the studio unless the person who blew it would put it on their own table. Seconds are recycled into the next gather.</p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <form class="newsletter" id="newsletter">
+      <label for="email">Get an email when the kiln opens</label>
+      <div class="newsletter-row">
+        <input id="email" type="email" required placeholder="you@example.com" autocomplete="email">
+        <button class="btn btn-ice" type="submit">Notify me</button>
+      </div>
+      <p class="form-note" id="newsletterNote" aria-live="polite"></p>
+    </form>
+    <div class="footer-meta">
+      <p class="wordmark wordmark-big" aria-hidden="true">gather</p>
+      <p>A portfolio concept. Gather is a fictional studio; no orders are placed.</p>
+    </div>
+  </footer>
+
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="cart" id="cart" role="dialog" aria-modal="true" aria-labelledby="cartTitle" aria-hidden="true" inert>
+    <div class="cart-head">
+      <h2 id="cartTitle">Your cart</h2>
+      <button type="button" class="icon-btn" id="cartClose" aria-label="Close cart">✕</button>
+    </div>
+    <p class="cart-empty" id="cartEmpty">Your cart is empty. Pick a vessel from this month's kiln, or shape your own.</p>
+    <ul class="cart-list" id="cartList"></ul>
+    <div class="cart-foot" id="cartFoot">
+      <div class="ship"><div class="ship-bar" id="shipBar"></div><p id="shipText"></p></div>
+      <p class="subtotal"><span>Subtotal</span><strong id="subtotal">$0</strong></p>
+      <button type="button" class="btn btn-molten btn-block" id="checkout">Check out</button>
+      <p class="form-note" id="checkoutNote" aria-live="polite"></p>
+    </div>
+  </aside>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
