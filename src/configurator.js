@@ -3,7 +3,7 @@ import {
   makeRenderer, studioEnvironment, glassMaterial, vesselGeometry, setTint, capacityMl, CM_PER_UNIT, TINTS, prefersReducedMotion,
 } from './glass.js';
 
-const ICE = '#E8EEF1';
+const ICE = '#F4FAFF';
 
 export const DEFAULT_CUSTOM = { h: 2.2, base: 0.4, belly: 0.7, bellyPos: 0.34, neck: 0.22, lip: 0.34 };
 
@@ -30,7 +30,7 @@ export function initConfigurator(canvas, { onChange } = {}) {
   const g = gridCanvas.getContext('2d');
   g.fillStyle = ICE;
   g.fillRect(0, 0, 1024, 1024);
-  g.strokeStyle = 'rgba(31,53,196,0.16)';
+  g.strokeStyle = 'rgba(14,165,233,0.22)';
   g.lineWidth = 2;
   for (let i = 0; i <= 1024; i += 64) {
     g.beginPath(); g.moveTo(i, 0); g.lineTo(i, 1024); g.stroke();

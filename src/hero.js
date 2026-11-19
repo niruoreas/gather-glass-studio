@@ -4,36 +4,54 @@ import {
 } from './glass.js';
 import { PRODUCTS } from './products.js';
 
-const COBALT = '#1F35C4';
-const ICE = '#E8EEF1';
+const SKY = '#8ED1FC';
+const INK = '#0B2540';
 
+/**
+ * Headline sits on the left (top on phones) so it stays readable;
+ * the glass stands beside it and only bends the edge of the type.
+ */
 function drawHeadline(canvas, aspect) {
   const W = 2048;
   const H = Math.round(W / aspect);
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = COBALT;
+  ctx.fillStyle = SKY;
   ctx.fillRect(0, 0, W, H);
 
-  const lines = aspect > 1.15 ? ['Shaped by breath,', 'finished by hand.'] : ['Shaped', 'by breath,', 'finished', 'by hand.'];
-  ctx.fillStyle = ICE;
-  ctx.textAlign = 'center';
+  const wide = aspect > 1.1;
+  const lines = ['Shaped by', 'breath,', 'finished', 'by hand.'];
+  // a hot-pink sun behind the glass, so the refraction has colour to bend
+  const cx = wide ? W * 0.74 : W * 0.7;
+  const cy = wide ? H * 0.44 : H * 0.6;
+  const r = wide ? H * 0.2 : W * 0.24;
+  ctx.fillStyle = '#FF3D9A';
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+  ctx.lineWidth = W * 0.004;
+  for (let i = 1; i <= 3; i++) { ctx.beginPath(); ctx.arc(cx, cy, r + i * W * 0.022, 0, Math.PI * 2); ctx.stroke(); }
+
+  ctx.fillStyle = INK;
+  ctx.textAlign = 'left';
   ctx.textBaseline = 'alphabetic';
+  const font = (s) => `800 ${s}px "Plus Jakarta Sans", system-ui, sans-serif`;
 
-
-  // fit the longest line to ~94% of the width
   let size = 400;
-  const font = (s) => `500 ${s}px "Bodoni Moda", Didot, serif`;
   ctx.font = font(size);
+  if ('letterSpacing' in ctx) ctx.letterSpacing = `${-size * 0.02}px`;
   const widest = Math.max(...lines.map((l) => ctx.measureText(l).width));
-  size = Math.floor(size * Math.min((W * 0.84) / widest, (H * 0.86) / (lines.length * 400 * 0.92)));
+  const maxW = W * (wide ? 0.5 : 0.84);
+  const maxH = H * (wide ? 0.62 : 0.4);
+  size = Math.floor(size * Math.min(maxW / widest, maxH / (lines.length * 400 * 0.98)));
   ctx.font = font(size);
-  const lh = size * 1.0;
-  const total = lh * lines.length;
-  let y = (H - total) / 2 + size * 0.8;
+  if ('letterSpacing' in ctx) ctx.letterSpacing = `${-size * 0.02}px`;
+
+  const lh = size * 0.98;
+  const x = W * 0.075;
+  let y = wide ? (H - lh * lines.length) / 2 - H * 0.04 + size * 0.82 : H * 0.13 + size * 0.82;
   for (const l of lines) {
-    ctx.fillText(l, W / 2, y);
+    ctx.fillText(l, x, y);
     y += lh;
   }
 }
@@ -41,9 +59,9 @@ function drawHeadline(canvas, aspect) {
 export function initHero(canvas) {
   const reduce = prefersReducedMotion();
   const renderer = makeRenderer(canvas);
-  renderer.setClearColor(COBALT);
+  renderer.setClearColor(SKY);
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(COBALT);
+  scene.background = new THREE.Color(SKY);
   scene.environment = studioEnvironment(renderer);
 
   const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 50);
@@ -65,9 +83,11 @@ export function initHero(canvas) {
   let current = { ...from };
 
   const mat = glassMaterial(shapes[0].tint);
+  const clarity = 3; // hero glass is thinner-looking than the shop renders
+  mat.attenuationDistance *= clarity;
   const fromAtt = new THREE.Color(TINTS[shapes[0].tint].attenuation);
   const toAtt = fromAtt.clone();
-  let fromDist = TINTS[shapes[0].tint].dist;
+  let fromDist = TINTS[shapes[0].tint].dist * clarity;
   let toDist = fromDist;
 
   const vessel = new THREE.Mesh(vesselGeometry(current), mat);
@@ -76,6 +96,7 @@ export function initHero(canvas) {
   scene.add(pivot);
 
   let vesselScale = 1;
+  const base = { x: 0, y: 0 };
   function resize() {
     const w = canvas.clientWidth;
     const h = canvas.clientHeight;
@@ -95,7 +116,15 @@ export function initHero(canvas) {
     plane.material.map?.dispose();
     plane.material.map = tex;
     plane.material.needsUpdate = true;
-    vesselScale = camera.aspect < 0.6 ? 0.6 : camera.aspect < 0.8 ? 0.72 : camera.aspect < 1.2 ? 0.85 : 1;
+    const vh0 = 2 * camera.position.z * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+    const vw0 = vh0 * camera.aspect;
+    if (camera.aspect > 1.1) {
+      vesselScale = 0.95;
+      base.x = vw0 * 0.24; base.y = -vh0 * 0.02;
+    } else {
+      vesselScale = camera.aspect < 0.6 ? 0.5 : 0.62;
+      base.x = vw0 * 0.2; base.y = -vh0 * 0.1;
+    }
     pivot.scale.setScalar(vesselScale);
     render();
   }
@@ -118,7 +147,7 @@ export function initHero(canvas) {
     fromAtt.copy(mat.attenuationColor);
     toAtt.set(TINTS[shapes[idx].tint].attenuation);
     fromDist = mat.attenuationDistance;
-    toDist = TINTS[shapes[idx].tint].dist;
+    toDist = TINTS[shapes[idx].tint].dist * clarity;
     morphT = 0;
     onShape?.(shapes[idx]);
   }
@@ -159,8 +188,8 @@ export function initHero(canvas) {
       pivot.rotation.y = spin + pointer.x * 0.6;
       pivot.rotation.x = pointer.y * 0.18 + scrollProgress * 0.5;
       pivot.rotation.z = -pointer.x * 0.08;
-      pivot.position.x = pointer.x * 0.35;
-      pivot.position.y = -scrollProgress * 1.4;
+      pivot.position.x = base.x + pointer.x * 0.25;
+      pivot.position.y = base.y - scrollProgress * 1.4;
       pivot.scale.setScalar(vesselScale * (1 + scrollProgress * 0.35));
       render();
     }
@@ -170,7 +199,7 @@ export function initHero(canvas) {
   new IntersectionObserver(([entry]) => { visible = entry.isIntersecting; }).observe(canvas);
   new ResizeObserver(resize).observe(canvas);
 
-  const ready = document.fonts ? document.fonts.load('500 100px "Bodoni Moda"') : Promise.resolve();
+  const ready = document.fonts ? document.fonts.load('800 100px "Plus Jakarta Sans"') : Promise.resolve();
   ready.finally(() => {
     resize();
     requestAnimationFrame(tick);

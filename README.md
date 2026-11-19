@@ -17,7 +17,7 @@ A concept e-commerce site for a fictional glassblowing studio. Built as a portfo
 
 Vite, Three.js (MeshPhysicalMaterial transmission, LatheGeometry, PMREM environment) and Lenis smooth scroll. Written in vanilla JS with no framework.
 
-Type: Bodoni Moda (display) and Instrument Sans (body). Photos are free stock images from [Unsplash](https://unsplash.com).
+Type: Plus Jakarta Sans (headings) and Inter (body). Palette: sky blue, white and hot pink. Photos are free stock images from [Unsplash](https://unsplash.com).
 
 Accessibility: keyboard focus styles, a focus-managed cart dialog, `prefers-reduced-motion` support, and a no-WebGL fallback.
 

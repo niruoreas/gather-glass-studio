@@ -50,9 +50,9 @@ export async function renderThumbs(products, { width = 720, height = 900 } = {})
 
     const word = p.name.split(' ')[0];
     let size = 600;
-    ctx.font = `italic 500 ${size}px "Bodoni Moda", serif`;
+    ctx.font = `800 ${size}px "Plus Jakarta Sans", sans-serif`;
     size = Math.floor(size * Math.min(1, 980 / ctx.measureText(word).width));
-    ctx.font = `italic 500 ${size}px "Bodoni Moda", serif`;
+    ctx.font = `800 ${size}px "Plus Jakarta Sans", sans-serif`;
     ctx.fillText(word, 512, 640 + size * 0.34);
     backTex.needsUpdate = true;
 
